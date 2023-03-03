@@ -14,6 +14,10 @@ func (ctxt *Context) AvCodecSendFrame(f *Frame) int {
 	return int(C.avcodec_send_frame((*C.struct_AVCodecContext)(ctxt), (*C.struct_AVFrame)(f)))
 }
 
+func (ctxt *Context) AvCodecReceivePacket(a *Packet) int {
+	return int(C.avcodec_receive_packet((*C.struct_AVCodecContext)(ctxt), (*C.struct_AVPacket)(a)))
+}
+
 func (ctxt *Context) AvCodecGetPktTimebase() Rational {
 	return Rational(C.av_codec_get_pkt_timebase((*C.struct_AVCodecContext)(ctxt)))
 }
