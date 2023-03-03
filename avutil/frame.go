@@ -13,6 +13,7 @@ import (
 	"fmt"
 	"image"
 	"log"
+	"reflect"
 	"unsafe"
 )
 
@@ -37,63 +38,63 @@ func AvFrameGetQpTable(f *Frame, s, t *int) int8 {
 	return int8(*C.av_frame_get_qp_table((*C.struct_AVFrame)(unsafe.Pointer(f)), (*C.int)(unsafe.Pointer(s)), (*C.int)(unsafe.Pointer(t))))
 }
 
-//Allocate an Frame and set its fields to default values.
+// Allocate an Frame and set its fields to default values.
 func AvFrameAlloc() *Frame {
 	return (*Frame)(unsafe.Pointer(C.av_frame_alloc()))
 }
 
-//Free the frame and any dynamically allocated objects in it, e.g.
+// Free the frame and any dynamically allocated objects in it, e.g.
 func AvFrameFree(f *Frame) {
 	C.av_frame_free((**C.struct_AVFrame)(unsafe.Pointer(&f)))
 }
 
-//Allocate new buffer(s) for audio or video data.
+// Allocate new buffer(s) for audio or video data.
 func AvFrameGetBuffer(f *Frame, a int) int {
 	return int(C.av_frame_get_buffer((*C.struct_AVFrame)(unsafe.Pointer(f)), C.int(a)))
 }
 
-//Setup a new reference to the data described by an given frame.
+// Setup a new reference to the data described by an given frame.
 func AvFrameRef(d, s *Frame) int {
 	return int(C.av_frame_ref((*C.struct_AVFrame)(unsafe.Pointer(d)), (*C.struct_AVFrame)(unsafe.Pointer(s))))
 }
 
-//Create a new frame that references the same data as src.
+// Create a new frame that references the same data as src.
 func AvFrameClone(f *Frame) *Frame {
 	return (*Frame)(C.av_frame_clone((*C.struct_AVFrame)(unsafe.Pointer(f))))
 }
 
-//Unreference all the buffers referenced by frame and reset the frame fields.
+// Unreference all the buffers referenced by frame and reset the frame fields.
 func AvFrameUnref(f *Frame) {
 	cf := (*C.struct_AVFrame)(unsafe.Pointer(f))
 	C.av_frame_unref(cf)
 }
 
-//Move everythnig contained in src to dst and reset src.
+// Move everythnig contained in src to dst and reset src.
 func AvFrameMoveRef(d, s *Frame) {
 	C.av_frame_move_ref((*C.struct_AVFrame)(unsafe.Pointer(d)), (*C.struct_AVFrame)(unsafe.Pointer(s)))
 }
 
-//Check if the frame data is writable.
+// Check if the frame data is writable.
 func AvFrameIsWritable(f *Frame) int {
 	return int(C.av_frame_is_writable((*C.struct_AVFrame)(unsafe.Pointer(f))))
 }
 
-//Ensure that the frame data is writable, avoiding data copy if possible.
+// Ensure that the frame data is writable, avoiding data copy if possible.
 func AvFrameMakeWritable(f *Frame) int {
 	return int(C.av_frame_make_writable((*C.struct_AVFrame)(unsafe.Pointer(f))))
 }
 
-//Copy only "metadata" fields from src to dst.
+// Copy only "metadata" fields from src to dst.
 func AvFrameCopyProps(d, s *Frame) int {
 	return int(C.av_frame_copy_props((*C.struct_AVFrame)(unsafe.Pointer(d)), (*C.struct_AVFrame)(unsafe.Pointer(s))))
 }
 
-//Get the buffer reference a given data plane is stored in.
+// Get the buffer reference a given data plane is stored in.
 func AvFrameGetPlaneBuffer(f *Frame, p int) *AvBufferRef {
 	return (*AvBufferRef)(C.av_frame_get_plane_buffer((*C.struct_AVFrame)(unsafe.Pointer(f)), C.int(p)))
 }
 
-//Add a new side data to a frame.
+// Add a new side data to a frame.
 func AvFrameNewSideData(f *Frame, d AvFrameSideDataType, s int) *AvFrameSideData {
 	return (*AvFrameSideData)(C.av_frame_new_side_data((*C.struct_AVFrame)(unsafe.Pointer(f)), (C.enum_AVFrameSideDataType)(d), C.int(s)))
 }
@@ -116,7 +117,7 @@ func Linesize(f *Frame) (linesize [8]int32) {
 	return
 }
 
-//GetPicture creates a YCbCr image from the frame
+// GetPicture creates a YCbCr image from the frame
 func GetPicture(f *Frame) (img *image.YCbCr, err error) {
 	// For 4:4:4, CStride == YStride/1 && len(Cb) == len(Cr) == len(Y)/1.
 	// For 4:2:2, CStride == YStride/2 && len(Cb) == len(Cr) == len(Y)/2.
@@ -176,6 +177,23 @@ func AvSetFrame(f *Frame, w int, h int, pixFmt int) (err error) {
 		return
 	}
 	return
+}
+
+func ptr(buf []byte) *C.uint8_t {
+	h := (*reflect.SliceHeader)(unsafe.Pointer(&buf))
+	return (*C.uint8_t)(unsafe.Pointer(h.Data))
+}
+
+func (f *Frame) AvSetFrameFromImg(img image.Image) {
+	rawImg := image.NewYCbCr(img.Bounds(), image.YCbCrSubsampleRatio420)
+	f.data[0] = ptr(rawImg.Y)
+	f.data[1] = ptr(rawImg.Cb)
+	f.data[2] = ptr(rawImg.Cr)
+
+	w := C.int(img.Bounds().Dx())
+	f.linesize[0] = w
+	f.linesize[1] = w / 2
+	f.linesize[2] = w / 2
 }
 
 func AvFrameGetInfo(f *Frame) (width int, height int, linesize [8]int32, data [8]*uint8) {

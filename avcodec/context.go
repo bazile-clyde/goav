@@ -195,7 +195,7 @@ func (ctxt *Context) SetEncodeParams2(width int, height int, pxlFmt PixelFormat,
 	// ctxt.extradata_size = 0
 	// ctxt.channels = 0
 	ctxt.pix_fmt = int32(pxlFmt)
-	// C.av_opt_set(ctxt.priv_data, "preset", "ultrafast", 0)
+	C.av_opt_set(ctxt.priv_data, "preset", "ultrafast", 0)
 }
 
 func (ctxt *Context) SetEncodeParams(width int, height int, pxlFmt PixelFormat) {
