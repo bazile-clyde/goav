@@ -176,11 +176,6 @@ func (p *Parser) AvRegisterCodecParser() {
 }
 
 func (ctxt *Context) SetTimebase(num1 int, den1 int) {
-	if num1 == 0 || den1 == 0 {
-		ctxt.time_base.num = 1
-		ctxt.time_base.den = ctxt.sample_rate
-	}
-
 	ctxt.time_base.num = C.int(num1)
 	ctxt.time_base.den = C.int(den1)
 }
