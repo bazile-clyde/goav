@@ -105,10 +105,6 @@ func (c *Codec) AvcodecAllocContext3() *Context {
 	return (*Context)(C.avcodec_alloc_context3((*C.struct_AVCodec)(c)))
 }
 
-func AvcodecAllocContext() *Context {
-	return (*Context)(C.avcodec_alloc_context())
-}
-
 func (c *Codec) AvCodecIsEncoder() int {
 	return int(C.av_codec_is_encoder((*C.struct_AVCodec)(c)))
 }
