@@ -172,7 +172,7 @@ func AvSetFrame(f *Frame, w int, h int, pixFmt int) (err error) {
 	f.width = C.int(w)
 	f.height = C.int(h)
 	f.format = C.int(pixFmt)
-	if ret := C.av_frame_get_buffer((*C.struct_AVFrame)(unsafe.Pointer(f)), 32 /*alignment*/); ret < 0 {
+	if ret := C.av_frame_get_buffer((*C.struct_AVFrame)(unsafe.Pointer(f)), 0 /*alignment*/); ret < 0 {
 		err = fmt.Errorf("Error allocating avframe buffer. Err: %v", ret)
 		return
 	}
