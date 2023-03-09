@@ -7,6 +7,7 @@ package avutil
 	#cgo pkg-config: libavutil
 	#include <libavutil/frame.h>
 	#include <stdlib.h>
+	#include <stdint.h>
 */
 import "C"
 import (
@@ -182,6 +183,10 @@ func AvSetFrame(f *Frame, w int, h int, pixFmt int) (err error) {
 func ptr(buf []byte) *C.uint8_t {
 	h := (*reflect.SliceHeader)(unsafe.Pointer(&buf))
 	return (*C.uint8_t)(unsafe.Pointer(h.Data))
+}
+
+func (f *Frame) AvSetFramePTS(pts int64) {
+	f.pts = C.int64_t(pts)
 }
 
 func (f *Frame) AvSetFrameFromImg(img *image.YCbCr) {
