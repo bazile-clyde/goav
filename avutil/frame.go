@@ -184,11 +184,10 @@ func ptr(buf []byte) *C.uint8_t {
 	return (*C.uint8_t)(unsafe.Pointer(h.Data))
 }
 
-func (f *Frame) AvSetFrameFromImg(img image.Image) {
-	rawImg := image.NewYCbCr(img.Bounds(), image.YCbCrSubsampleRatio420)
-	f.data[0] = ptr(rawImg.Y)
-	f.data[1] = ptr(rawImg.Cb)
-	f.data[2] = ptr(rawImg.Cr)
+func (f *Frame) AvSetFrameFromImg(img *image.YCbCr) {
+	f.data[0] = ptr(img.Y)
+	f.data[1] = ptr(img.Cb)
+	f.data[2] = ptr(img.Cr)
 
 	w := C.int(img.Bounds().Dx())
 	f.linesize[0] = w
