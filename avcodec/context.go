@@ -185,7 +185,7 @@ func (ctxt *Context) SetEncodeParams2(width int, height int, pxlFmt PixelFormat,
 	ctxt.height = C.int(height)
 	ctxt.bit_rate = 200000
 	ctxt.gop_size = C.int(gopSize)
-	// ctxt.max_b_frames = 2
+	ctxt.max_b_frames = 1
 	if hasBframes {
 		ctxt.has_b_frames = 1
 	} else {
